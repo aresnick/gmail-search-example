@@ -5,7 +5,7 @@ from apiclient import discovery
 from oauth2client import file, client, tools
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.CRITICAL)
 
 
 config = {
@@ -37,9 +37,9 @@ def authenticate():
 	GMAIL = discovery.build('gmail', 'v1', http=creds.authorize(Http()))
 	return GMAIL
 
-config.service = authenticate()
+config['service'] = authenticate()
 
-def search(query=config.query, maxResults=config.maxResults, user=config.user, service=config.service):
+def search(query=config['query'], maxResults=config['maxResults'], user=config['user'], service=config['service']):
 	logging.debug(" ".join([
 		"Beginning search for",
 		query + ',',

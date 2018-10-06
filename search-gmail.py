@@ -1,11 +1,21 @@
 #! /usr/bin/env python
 
+# For accessing, parsing results from Gmail API
 from httplib2 import Http
 from apiclient import discovery
 from oauth2client import file, client, tools
+import base64 # For decoding responses
+import email # For parsing email messages
 
-import json
+# For parsing and cleaning up HTML
+from bs4 import BeautifulSoup
+import re
+import quopri
 
+# For exporting messages
+import json 
+
+# Setting up logging
 import logging
 logging.basicConfig(level=logging.ERROR)
 

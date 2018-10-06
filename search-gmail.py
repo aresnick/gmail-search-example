@@ -145,7 +145,26 @@ class GmailMessage:
 
 
 # An example of how to use this class
+print(" ".join([
+	"Making the search object for", defaults['query'], "as", defaults['user'], 
+	"limiting the results to", str(defaults['maxResults'])]))
 search = GmailSearch() # Make the search
+print("Running the search...")
 results = search.search() # Run it
-firstMessage = GmailMessage(x.retrieveRawMessageById(x.results[0]['id'])) # Look up the first message by its ID
-firstMessage.saveAsJSON() # Save the JSON to a file
+
+print("Getting the actual messages by id…")
+rawMessages = []
+for m in results:
+	print("Retrieving" + " " + m['id'])
+	rawMessages.append(search.retrieveRawMessageById(m['id']))
+
+print("Done retrieving messages.  Now Extracting the message data...")
+messages = [GmailMessage(rm).getDictionary() for rm in rawMessages]
+
+import time
+current_milli_time = lambda: int(round(time.time() * 1000))
+
+filename = 'results-' + str(current_milli_time()) + '.json'
+print("Saving" + " " + filename)
+with open(filename, 'w') as outfile:
+	outfile.write(json.dumps(messages))

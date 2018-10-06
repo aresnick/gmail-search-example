@@ -7,14 +7,6 @@ from oauth2client import file, client, tools
 import logging
 logging.basicConfig(level=logging.ERROR)
 
-
-config = {
-	'service': None,
-	'user': 'me',
-	'query': 'from:me',
-	'maxResults': 1
-}
-
 class GmailSearch:
 	def __init__(self, user='me', query='from:me', maxResults=1):
 		self.user = user

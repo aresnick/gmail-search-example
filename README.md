@@ -18,7 +18,7 @@ This script requires Python 3.  I recommend you install Python 3 with `homebrew`
 
 At this point, you should be able to run `python search-gmail.py` from your command line in this folder and see the example run, to wit:
 ```
-(gmail-search-cli) ➜  gmail-search-cli git:(master) ✗ python search-gmail.py
+(gmail-search-cli) ➜  gmail-search-cli git:(master) python search-gmail.py
 Making the search object for from:me as me limiting the results to 10
 Running the search...
 Getting the actual messages by id…
@@ -32,6 +32,6 @@ Retrieving 166499385ef0920b
 Retrieving 166467f85fdc07c5
 Retrieving 166467e24965ec21
 Retrieving 1664669971ade6e6
-Extracting the message data...
-Saving results-1538865144916.json
+Done retrieving messages.  Now extracting the message data...
+Saving results-1538866192052.json
 ```

@@ -26,9 +26,9 @@ def authenticate():
 	creds = store.get()
 	if not creds or creds.invalid:
 		if not cred:
-			logging.debug("Local credentials not found.")
+			logging.error("Local credentials not found.")
 		elif creds.invalid:
-			logging.debug("Local credentials not valid.")
+			logging.error("Local credentials not valid.")
 		logging.info("Loading authentication flow...")
 		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
 		creds = tools.run_flow(flow, store)

@@ -77,6 +77,21 @@ class GmailMessage:
 		html_parts_strings = map(lambda p: p.as_string(), html_parts)
 		self.html = '\n'.join(html_parts_strings)
 
+	def getDictionary(self):
+		d = {}
+		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'html']
+		for attr in attrsToSave:
+			d[attr] = getattr(self, attr)
+
+		return d
+
+	def saveAsJSON(self, filename=None):
+		if (not filename):
+			filename = self.id + '.json'
+
+		with open(filename, 'w') as outfile:
+			json.dump(self.getDictionary(), outfile)
+
 x = GmailSearch()
 x.search()
 y = GmailMessage(x.retrieveRawMessageById(x.results[0]['id']))

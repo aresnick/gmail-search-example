@@ -65,3 +65,26 @@ class GmailSearch:
 		logging.info(" ".join(["Found a total of", str(len(self.results)), "messages"]))
 
 		return self.results
+
+	def retrieveRawMessageById(self, message_id):
+		return self.service.users().messages().get(userId=self.user, id=message_id, format='raw').execute()
+
+class GmailMessage:
+	def __init__(self, rawResponse):
+		for key, value in rawResponse.items():
+			if (key == 'raw'):
+				b64decodedRaw = base64.urlsafe_b64decode(value.encode('ASCII'))
+				setattr(self, key, b64decodedRaw)
+			else:
+				setattr(self, key, value)
+
+		self.parsed = email.message_from_bytes(self.raw)
+
+		def html_filter(part): return part.get_content_type() == "text/html"
+		html_parts = list(filter(html_filter, self.parsed.walk()))
+		html_parts_strings = map(lambda p: p.as_string(), html_parts)
+		self.html = '\n'.join(html_parts_strings)
+
+x = GmailSearch()
+x.search()
+y = GmailMessage(x.retrieveRawMessageById(x.results[0]['id']))

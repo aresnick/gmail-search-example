@@ -6,7 +6,7 @@ Incredibly, this minimal example didn't seem to exist at first.  Thanks to [abhi
 
 # Installation
 
-This script requires Python 3.  I recommend you install Python 3 with `homebrew` _via_ `[brew](https://brew.sh/) install python`.
+This script requires Python 3.  I recommend you install Python 3 with [`homebrew`](https://brew.sh/) _via_ `brew install python`.
 
 1. Clone this repository.
 2. In this directory, run `python3 -m venv ~/.virtualenvs/gmail-search-cli`.  This generates a [virtual environment](https://docs.python.org/3/library/venv.html) to simplify dependencies and installation.

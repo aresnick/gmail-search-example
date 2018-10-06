@@ -16,12 +16,12 @@ config = {
 }
 
 def authenticate():
-	logging.debug("Beginning authentication…")
+	logging.debug("Beginning authentication...")
 	# Set the scope we'll be using in our search; since we're only searching we only need readonly
 	SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'
 
 	# Grab our stored credentials, running the OAuth flow if we don't have them already
-	logging.debug("Looking for local authentication information…")
+	logging.debug("Looking for local authentication information...")
 	store = file.Storage('storage.json') 
 	creds = store.get()
 	if not creds or creds.invalid:
@@ -29,7 +29,7 @@ def authenticate():
 			logging.debug("Local credentials not found.")
 		elif creds.invalid:
 			logging.debug("Local credentials not valid.")
-		logging.debug("Loading authentication flow…")
+		logging.debug("Loading authentication flow...")
 		flow = client.flow_from_clientsecrets('client_secret.json', SCOPES)
 		creds = tools.run_flow(flow, store)
 
@@ -46,8 +46,7 @@ def search(query=config.query, maxResults=config.maxResults, user=config.user, s
 		"limiting results to",
 		maxResults,
 		"as",
-		user + '…'
+		user + '...'
 		]))
 	response = GMAIL.users().messages().list(userId=user, maxResults=maxResults, q=query).execute()
 	return response
-

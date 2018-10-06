@@ -168,7 +168,7 @@ for m in results:
 	print("Retrieving" + " " + m['id'])
 	rawMessages.append(search.retrieveRawMessageById(m['id']))
 
-print("Done retrieving messages.  Now Extracting the message data...")
+print("Done retrieving messages.  Now extracting the message data...")
 messages = [GmailMessage(rm).getDictionary() for rm in rawMessages]
 
 import time

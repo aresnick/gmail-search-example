@@ -1,3 +1,2 @@
-# Sensitive GMail data
-storage.json
-client_secret.json
+# Sensitive GMail data, message exports
+*.json

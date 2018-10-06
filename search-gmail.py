@@ -4,6 +4,12 @@ from httplib2 import Http
 from apiclient import discovery
 from oauth2client import file, client, tools
 
+config = {
+	'user': 'me',
+	'query': 'from:me',
+	'maxResults': 1
+}
+
 def authenticate():
 	# Set the scope we'll be using in our search; since we're only searching we only need readonly
 	SCOPES = 'https://www.googleapis.com/auth/gmail.readonly'

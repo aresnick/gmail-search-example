@@ -97,31 +97,35 @@ class GmailMessage:
 		# Turns out we also need to strip out the `quoted-printable` encoding:  https://stackoverflow.com/questions/39691628/unicode-encoding-in-email
 		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode('utf8'), html_parts_strings)
 		
-		self.raw_html = '\n'.join(html_parts_quopri_strings)
-		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted)
-		self.removeQuoted = removeQuoted
+		self.raw_html = '\n'.join(html_parts_quopri_strings) # Join the HTML parts together
+		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted) # Prettify the HTML
+		self.quotesRemoved = removeQuoted # Save whether we removed the quotes in prettifying
 
 	def prettifyHTML(html, removeQuoted):
-		prettifiedHTML = BeautifulSoup(html, 'html.parser').prettify()
-		def generate_decomposer_for_selector(selector):
-			def decomposer(html):
-				bs = BeautifulSoup(html)
-				toDecompose = bs.select(selector)
-				for node in toDecompose:
-					node.decompose()
-				return str(bs.prettify())
-			return decomposer
-
+		# An array to hold functions which will transform our prettified HTML
 		transforms = [
 		lambda h: re.sub('Content-Type: .+?\n', '', h),
 		lambda h: re.sub('Content-Transfer-Encoding: .+?\n', '', h),
+		lambda h: BeautifulSoup(h, 'html.parser').prettify()
 		]
 
 		if (removeQuoted):
-			transforms.append(generate_decomposer_for_selector('.gmail_quote'))
+			# If we're going to remove the quoted sections
+			def generate_decomposer_for_selector(selector):
+				# Generate a function which will remove all the nodes matching a selector
+				def decomposer(html):
+					bs = BeautifulSoup(html, 'html.parser')
+					toDecompose = bs.select(selector)
+					for node in toDecompose:
+						node.decompose()
+					return str(bs.prettify())
+				return decomposer
 
+			transforms.append(generate_decomposer_for_selector('.gmail_quote')) # And add that function to our transforms list
+
+		# Run all our transforms on the html
 		for transform in transforms:
-			prettifiedHTML = transform(prettifiedHTML)
+			prettifiedHTML = transform(html)
 		
 		return prettifiedHTML
 

@@ -13,7 +13,7 @@ import re
 import quopri
 
 # For exporting messages
-import json 
+import json
 
 # Setting up logging
 import logging
@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.ERROR)
 defaults = {
 	'user': 'me',
 	'query': 'from:me',
-	'maxResults': 100
+	'maxResults': 10
 }
 
 class GmailSearch:
@@ -31,7 +31,7 @@ class GmailSearch:
 		self.query = query
 		self.maxResults = maxResults
 
-		self.service = self.authenticate()
+		self.service = self.authenticate() # Gmail authentication object
 		self.results = []
 
 	def authenticate(self):
@@ -77,20 +77,23 @@ class GmailSearch:
 		return self.results
 
 	def retrieveRawMessageById(self, message_id):
+		logging.info("Requesting the raw message for message ID: " + message_id)
 		return self.service.users().messages().get(userId=self.user, id=message_id, format='raw').execute()
 
+
 class GmailMessage:
-	def __init__(self, rawResponse):
+	def __init__(self, rawResponse, removeQuoted=True):
+		# Given a raw message response, save all our data
 		for key, value in rawResponse.items():
 			if (key == 'raw'):
-				b64decodedRaw = base64.urlsafe_b64decode(value.encode('ASCII'))
+				b64decodedRaw = base64.urlsafe_b64decode(value.encode('ASCII')) # decode the raw message data
 				setattr(self, key, b64decodedRaw)
 			else:
 				setattr(self, key, value)
 
-		self.parsed = email.message_from_bytes(self.raw)
+		self.parsed = email.message_from_bytes(self.raw) # parse the email
 
-		def html_filter(part): return part.get_content_type() == "text/html"
+		def html_filter(part): return part.get_content_type() == "text/html" # pull out the HTML parts of the body
 		html_parts = list(filter(html_filter, self.parsed.walk()))
 		html_parts_strings = map(lambda p: p.as_string(), html_parts)
 
@@ -130,6 +133,7 @@ class GmailMessage:
 		return prettifiedHTML
 
 	def getDictionary(self):
+		# Because we want to be able to save this object as JSON, we need to export a simple dictionary (not a whole Python object)
 		d = {}
 		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'raw_html', 'pretty_html']
 		for attr in attrsToSave:
@@ -138,9 +142,11 @@ class GmailMessage:
 		return d
 
 	def getAsJSON(self):
+		# Exports the JSON version of this object
 		return json.dumps(self.getDictionary())
 
-	def saveAsJSON(self, filename=None):
+	def save(self, filename=None):
+		# Saves the JSON version of this object to a file
 		if (not filename):
 			filename = self.id + '.json'
 

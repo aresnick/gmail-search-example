@@ -83,23 +83,59 @@ class GmailMessage:
 		def html_filter(part): return part.get_content_type() == "text/html"
 		html_parts = list(filter(html_filter, self.parsed.walk()))
 		html_parts_strings = map(lambda p: p.as_string(), html_parts)
-		self.html = '\n'.join(html_parts_strings)
+
+		# Turns out we also need to strip out the `quoted-printable` encoding:  https://stackoverflow.com/questions/39691628/unicode-encoding-in-email
+		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode('utf8'), html_parts_strings)
+		
+		self.raw_html = '\n'.join(html_parts_quopri_strings)
+		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted)
+		self.removeQuoted = removeQuoted
+
+	def prettifyHTML(html, removeQuoted):
+		prettifiedHTML = BeautifulSoup(html, 'html.parser').prettify()
+		def generate_decomposer_for_selector(selector):
+			def decomposer(html):
+				bs = BeautifulSoup(html)
+				toDecompose = bs.select(selector)
+				for node in toDecompose:
+					node.decompose()
+				return str(bs.prettify())
+			return decomposer
+
+		transforms = [
+		lambda h: re.sub('Content-Type: .+?\n', '', h),
+		lambda h: re.sub('Content-Transfer-Encoding: .+?\n', '', h),
+		]
+
+		if (removeQuoted):
+			transforms.append(generate_decomposer_for_selector('.gmail_quote'))
+
+		for transform in transforms:
+			prettifiedHTML = transform(prettifiedHTML)
+		
+		return prettifiedHTML
 
 	def getDictionary(self):
 		d = {}
-		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'html']
+		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'raw_html', 'pretty_html']
 		for attr in attrsToSave:
 			d[attr] = getattr(self, attr)
 
 		return d
+
+	def getAsJSON(self):
+		return json.dumps(self.getDictionary())
 
 	def saveAsJSON(self, filename=None):
 		if (not filename):
 			filename = self.id + '.json'
 
 		with open(filename, 'w') as outfile:
-			json.dump(self.getDictionary(), outfile)
+			outfile.write(self.getAsJSON())
 
-x = GmailSearch()
-x.search()
-y = GmailMessage(x.retrieveRawMessageById(x.results[0]['id']))
+
+# An example of how to use this class
+search = GmailSearch() # Make the search
+results = search.search() # Run it
+firstMessage = GmailMessage(x.retrieveRawMessageById(x.results[0]['id'])) # Look up the first message by its ID
+firstMessage.saveAsJSON() # Save the JSON to a file

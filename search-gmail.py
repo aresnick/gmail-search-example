@@ -23,5 +23,6 @@ def authenticate():
 
 	# Create the GMAIL service object with our credentials
 	GMAIL = discovery.build('gmail', 'v1', http=creds.authorize(Http()))
+	return GMAIL
 
-authenticate()
+service = authenticate()

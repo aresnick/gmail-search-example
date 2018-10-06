@@ -2,7 +2,7 @@
 
 Motivated by a project of [miriamzisook](https://github.com/orgs/powderhouse/people/miriamzisook), this is the simplest possible example of accessing the [Gmail API](https://developers.google.com/api-client-library/python/) via Python to execute a search for messages and save sanely formatted message results.
 
-Incredibly, this minimal example didn't seem to exist at first.  Thanks to [abhishekchhibber](https://github.com/abhishekchhibber)'s [Gmail-Api-through-Python](https://github.com/abhishekchhibber/Gmail-Api-through-Python/blob/master/gmail_read.py) for getting us started.
+Incredibly, this minimal example didn't seem to exist at first.  Thanks to [abhishekchhibber](https://github.com/abhishekchhibber)'s [`Gmail-Api-through-Python`](https://github.com/abhishekchhibber/Gmail-Api-through-Python/blob/master/gmail_read.py) for getting us started.
 
 # Installation
 

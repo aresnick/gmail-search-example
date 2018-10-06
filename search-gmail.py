@@ -9,8 +9,14 @@ import json
 import logging
 logging.basicConfig(level=logging.ERROR)
 
+defaults = {
+	'user': 'me',
+	'query': 'from:me',
+	'maxResults': 100
+}
+
 class GmailSearch:
-	def __init__(self, user='me', query='from:me', maxResults=1):
+	def __init__(self, user=defaults['user'], query=defaults['query'], maxResults=defaults['maxResults']):
 		self.user = user
 		self.query = query
 		self.maxResults = maxResults

@@ -126,9 +126,10 @@ class GmailMessage:
 
 			transforms.append(generate_decomposer_for_selector('.gmail_quote')) # And add that function to our transforms list
 
+		prettifiedHTML = html
 		# Run all our transforms on the html
 		for transform in transforms:
-			prettifiedHTML = transform(html)
+			prettifiedHTML = transform(prettifiedHTML)
 		
 		return prettifiedHTML
 

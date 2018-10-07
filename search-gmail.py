@@ -12,6 +12,13 @@ from bs4 import BeautifulSoup
 import re
 import quopri
 
+# For parsing HTML to Markdown
+import html2text
+html2markdown = html2text.HTML2Text()
+html2markdown.body_width = 0
+html2markdown.unicode_snob = True
+
+
 # For exporting messages
 import json
 
@@ -24,6 +31,9 @@ defaults = {
 	'query': 'from:me',
 	'maxResults': 10
 }
+
+def prettyJSON(data):
+	return json.dumps(data, indent=4, ensure_ascii=False)
 
 class GmailSearch:
 	def __init__(self, user=defaults['user'], query=defaults['query'], maxResults=defaults['maxResults']):
@@ -86,7 +96,7 @@ class GmailMessage:
 		# Given a raw message response, save all our data
 		for key, value in rawResponse.items():
 			if (key == 'raw'):
-				b64decodedRaw = base64.urlsafe_b64decode(value.encode('ASCII')) # decode the raw message data
+				b64decodedRaw = base64.urlsafe_b64decode(value.encode('UTF-8')) # decode the raw message data
 				setattr(self, key, b64decodedRaw)
 			else:
 				setattr(self, key, value)
@@ -102,6 +112,7 @@ class GmailMessage:
 		
 		self.raw_html = '\n'.join(html_parts_quopri_strings) # Join the HTML parts together
 		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted) # Prettify the HTML
+		self.markdown = html2markdown.handle(self.pretty_html)
 		self.quotesRemoved = removeQuoted # Save whether we removed the quotes in prettifying
 
 	def prettifyHTML(html, removeQuoted):
@@ -109,7 +120,7 @@ class GmailMessage:
 		transforms = [
 		lambda h: re.sub('Content-Type: .+?\n', '', h),
 		lambda h: re.sub('Content-Transfer-Encoding: .+?\n', '', h),
-		lambda h: BeautifulSoup(h, 'html.parser').prettify()
+		lambda h: BeautifulSoup(h, 'html.parser').prettify('UTF-8'),
 		]
 
 		if (removeQuoted):
@@ -136,7 +147,7 @@ class GmailMessage:
 	def getDictionary(self):
 		# Because we want to be able to save this object as JSON, we need to export a simple dictionary (not a whole Python object)
 		d = {}
-		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'raw_html', 'pretty_html']
+		attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds', 'snippet', 'sizeEstimate', 'raw_html', 'pretty_html', 'markdown']
 		for attr in attrsToSave:
 			d[attr] = getattr(self, attr)
 
@@ -144,7 +155,7 @@ class GmailMessage:
 
 	def getAsJSON(self):
 		# Exports the JSON version of this object
-		return json.dumps(self.getDictionary())
+		return prettJSON(self.getDictionary())
 
 	def save(self, filename=None):
 		# Saves the JSON version of this object to a file
@@ -163,7 +174,7 @@ search = GmailSearch() # Make the search
 print("Running the search...")
 results = search.search() # Run it
 
-print("Getting the actual messages by id…")
+print("Getting the actual messages by id...")
 rawMessages = []
 for m in results:
 	print("Retrieving" + " " + m['id'])
@@ -178,4 +189,4 @@ current_milli_time = lambda: int(round(time.time() * 1000))
 filename = 'results-' + str(current_milli_time()) + '.json'
 print("Saving" + " " + filename)
 with open(filename, 'w') as outfile:
-	outfile.write(json.dumps(messages))
+	outfile.write(prettyJSON(messages))

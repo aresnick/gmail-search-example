@@ -4,6 +4,7 @@ Incredibly, this minimal example didn't seem to exist at first.  Thanks to [abhi
 
 **TODO**
 - [x] Support download of formatted HTML messages to JSON
+- [x] Support Markdown rendering of messages
 - [ ] Support download of attachments as base64 encoded strings in JSON
 
 # Installation

@@ -46,7 +46,8 @@ def prettyJSON(data):
 
 
 def detectHTMLencoding(html):
-    charset_string = re.search('charset="(.+?)"', html).group(1)
+    charset_re = re.search('charset="(.+?)"', html)
+    charset_string = charset_re.group(1) if charset_re else None
     chardet_encoding = chardet.detect(quopri.decodestring(html))['encoding']
 
     if charset_string:
@@ -147,12 +148,12 @@ class GmailMessage:
                     value.encode('UTF-8'))  # decode the raw message data
                 logging.debug(' '.join([
                         "Setting", key, "to",
-                        str(b64decodedRaw)[0:10] + "..."
+                        str(b64decodedRaw)[0:100] + "..."
                         ]))
                 setattr(self, key, b64decodedRaw)
             else:
                 logging.debug(
-                    ' '.join(["Setting", key, "to", str(value)[0:10] + "..."]))
+                    ' '.join(["Setting", key, "to", str(value)[0:100] + "..."]))
                 setattr(self, key, value)
 
         logging.info("Parsing the email message from bytes...")

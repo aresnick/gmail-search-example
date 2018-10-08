@@ -10,6 +10,7 @@ import email # For parsing email messages
 # For parsing and cleaning up HTML
 from bs4 import BeautifulSoup
 import re
+import chardet
 import quopri
 
 # For parsing HTML to Markdown
@@ -108,7 +109,7 @@ class GmailMessage:
 		html_parts_strings = map(lambda p: p.as_string(), html_parts)
 
 		# Turns out we also need to strip out the `quoted-printable` encoding:  https://stackoverflow.com/questions/39691628/unicode-encoding-in-email
-		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode('utf8'), html_parts_strings)
+		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode(chardet.detect(quopri.decodestring(p))['encoding']), html_parts_strings)
 		
 		self.raw_html = '\n'.join(html_parts_quopri_strings) # Join the HTML parts together
 		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted) # Prettify the HTML

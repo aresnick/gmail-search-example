@@ -21,7 +21,7 @@ import time  # For naming results files uniquely
 
 # Setting up logging
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 # Configuring HTML to Markdown
 html2markdown = html2text.HTML2Text()

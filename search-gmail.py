@@ -30,11 +30,23 @@ logging.basicConfig(level=logging.ERROR)
 defaults = {
 	'user': 'me',
 	'query': 'from:me',
-	'maxResults': 10
+	'maxResults': 10,
+	'encoding': 'UTF-8'
 }
 
 def prettyJSON(data):
 	return json.dumps(data, indent=4, ensure_ascii=False)
+
+def detectHTMLencoding (html):
+	charset_string = re.search('charset="(.+?)"', html).group(1)
+	chardet_encoding = chardet.detect(html)['encoding']
+
+	if charset_string:
+		return charset_string
+	elif chardet_encoding:
+		return chardet_encoding
+	else:
+		return defaults['encoding']
 
 class GmailSearch:
 	def __init__(self, user=defaults['user'], query=defaults['query'], maxResults=defaults['maxResults']):
@@ -108,8 +120,10 @@ class GmailMessage:
 		html_parts = list(filter(html_filter, self.parsed.walk()))
 		html_parts_strings = map(lambda p: p.as_string(), html_parts)
 
+		
+
 		# Turns out we also need to strip out the `quoted-printable` encoding:  https://stackoverflow.com/questions/39691628/unicode-encoding-in-email
-		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode(chardet.detect(quopri.decodestring(p))['encoding']), html_parts_strings)
+		html_parts_quopri_strings = map(lambda p: quopri.decodestring(p).decode(detectHTMLencoding(p), errors='ignore'), html_parts_strings)
 		
 		self.raw_html = '\n'.join(html_parts_quopri_strings) # Join the HTML parts together
 		self.pretty_html = GmailMessage.prettifyHTML(self.raw_html, removeQuoted) # Prettify the HTML
@@ -118,6 +132,7 @@ class GmailMessage:
 
 	def prettifyHTML(html, removeQuoted):
 		# An array to hold functions which will transform our prettified HTML
+
 		transforms = [
 		lambda h: re.sub('Content-Type: .+?\n', '', h),
 		lambda h: re.sub('Content-Transfer-Encoding: .+?\n', '', h),

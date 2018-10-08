@@ -107,7 +107,7 @@ class GmailSearch:
         if 'messages' in response:
             logging.info(
                 " ".join([
-                    "Received", 
+                    "Received",
                     str(len(response['messages'])), "messages..."
                     ]))
             self.results.extend(response['messages'])
@@ -152,8 +152,9 @@ class GmailMessage:
                         ]))
                 setattr(self, key, b64decodedRaw)
             else:
-                logging.debug(
-                    ' '.join(["Setting", key, "to", str(value)[0:100] + "..."]))
+                logging.debug(' '.join([
+                    "Setting", key, "to", str(value)[0:100] + "..."
+                    ]))
                 setattr(self, key, value)
 
         logging.info("Parsing the email message from bytes...")
@@ -214,7 +215,7 @@ class GmailMessage:
         # export a simple dictionary (not a whole Python object)
         d = {}
         attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds',
-                       'snippet', 'sizeEstimate', 'raw_html', 'pretty_html', 
+                       'snippet', 'sizeEstimate', 'raw_html', 'pretty_html',
                        'markdown']
         for attr in attrsToSave:
             d[attr] = getattr(self, attr)

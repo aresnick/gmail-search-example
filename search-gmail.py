@@ -160,19 +160,9 @@ class GmailMessage:
         logging.info("Parsing the email message from bytes...")
         self.parsed = email.message_from_bytes(self.raw)  # parse the email
 
-        def is_multipart(part):  # Inline function for filtering the metadata
-            return "multipart/alternative" in part['Content-Type']
-
-        # Grab the metadata for the message (from, to, etc.)
-        parsed_items = [dict(p.items()) for p in self.parsed.walk()]
-        metadata = list(filter(is_multipart, parsed_items))
-
-        # If there's no metadata
-        metadata = metadata[0] if len(metadata) >= 1 else {}
-
         # Save the metadata in our own attributes, appending _multipart if
         # we run the risk of overwriting data pulled from the rawResponse above
-        for key, value in metadata.items():
+        for key, value in self.parsed.items():
             if (hasattr(self, key)):
                 log_msg = " ".join([
                     "Found pre-existing key",

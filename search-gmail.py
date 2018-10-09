@@ -167,7 +167,7 @@ class GmailMessage:
         parsed_items = [dict(p.items()) for p in self.parsed.walk()]
         metadata = list(filter(is_multipart, parsed_items))
         # If there's no metadata
-        metadata = metadata[0] if len(metadata) > 1 else []
+        metadata = metadata[0] if len(metadata) > 1 else {}
 
         # Save the metadata in our own attributes, appending _multipart if
         # we run the risk of overwriting data pulled from the rawResponse above

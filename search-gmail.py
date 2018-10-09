@@ -160,6 +160,30 @@ class GmailMessage:
         logging.info("Parsing the email message from bytes...")
         self.parsed = email.message_from_bytes(self.raw)  # parse the email
 
+        def is_multipart(part):  # Inline function for filtering the metadata
+            return "multipart/alternative" in part['Content-Type']
+
+        # Grab the metadata for the message (from, to, etc.)
+        parsed_items = [dict(p.items()) for p in self.parsed.walk()]
+        metadata = list(filter(is_multipart, parsed_items))[0]
+
+        # Save the metadata in our own attributes, appending _multipart if
+        # we run the risk of overwriting data pulled from the rawResponse above
+        for key, value in metadata.items():
+            if (hasattr(self, key)):
+                log_msg = " ".join([
+                    "Found pre-existing key",
+                    key, "appending multipart to preserve uniqueness."
+                    ])
+                logging.debug(log_msg)
+                key = key + "_multipart"
+
+            logging.debug(' '.join([
+                    "Setting", key, "to", str(value)[0:100] + "..."
+                    ]))
+            setattr(self, key, value)
+
+        # Pull out the likely body of the message
         html_parts = list(filter(lambda p: p.get_content_type()
                                  == "text/html", self.parsed.walk()))
         html_parts_strings = map(lambda p: p.as_string(), html_parts)
@@ -214,11 +238,13 @@ class GmailMessage:
         # Because we want to be able to save this object as JSON, we need to
         # export a simple dictionary (not a whole Python object)
         d = {}
-        attrsToSave = ['id', 'threadId', 'internalDate', 'labelIds',
-                       'snippet', 'sizeEstimate', 'raw_html', 'pretty_html',
-                       'markdown']
+        attrsToSave = [
+            'Message-ID', 'In-Reply-To', 'id', 'threadId', 'internalDate',
+            'labelIds', 'snippet', 'sizeEstimate', 'To', 'From', 'Subject',
+            'Date', 'raw_html', 'pretty_html', 'markdown'
+            ]
         for attr in attrsToSave:
-            d[attr] = getattr(self, attr)
+            d[attr] = getattr(self, attr) if hasattr(self, attr) else None
 
         return d
 
